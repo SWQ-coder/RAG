@@ -1,0 +1,98 @@
+/* ============================================================
+   全局样式入口（main.css）
+   基于 Tailwind 的三层指令 + 自定义组件类 + 应用级辅助样式
+   【开发思路】
+   1. 三层 @tailwind 指令：base（重置+基础）→ components（组件类）
+      → utilities（工具类），顺序即层叠优先级；
+   2. @layer base 里定制全局基础：滚动条美化（细条、圆角）、
+      默认字体栈（苹方/鸿蒙/微软雅黑 优先）；
+   3. @layer components 里用 @apply 定义"业务组件类"：
+      按钮（primary/ghost/danger 三态）、卡片、输入框、状态徽章。
+      这样模板里写 class="btn-primary" 就有一致的外观，且能复用 Tailwind 的
+      hover/disabled 等状态修饰符；
+   4. .prose-rag：LLM 输出的 markdown 渲染样式（v-html 注入的内容），
+      相当于一个轻量"markdown 主题"，让 AI 回答里的标题/列表/代码/表格
+      都美观可读；
+   5. 最后是动画：光标闪烁（流式输出打字效果）与 fade 过渡（toast 弹层）。
+   ============================================================ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    @apply bg-gray-50 text-gray-900;
+    font-family: "PingFang SC", "HarmonyOS Sans", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  /* 细滚动条：5px 宽、透明轨道、圆角滑块——适配聊天/列表长滚场景 */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-gray-300 rounded-full; }
+}
+
+@layer components {
+  /* 按钮基类：所有按钮的公共外观（图标+文字、禁用态、悬停过渡） */
+  .btn {
+    @apply inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium
+           transition-all duration-150 cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  /* 主按钮：品牌色背景，悬停加深（用于主要操作：新建/上传/发送） */
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800;
+  }
+  /* 幽灵按钮：无底色，悬停浅灰（用于次级操作：返回/取消/小按钮） */
+  .btn-ghost {
+    @apply btn text-gray-600 hover:bg-gray-100 active:bg-gray-200;
+  }
+  /* 危险按钮：红色文字，悬停红底（用于删除类操作） */
+  .btn-danger {
+    @apply btn text-red-600 hover:bg-red-50 active:bg-red-100;
+  }
+  /* 卡片：白底 + 圆角 + 细边 + 轻阴影（列表项/统计卡/气泡的通用容器） */
+  .card {
+    @apply bg-white rounded-xl border border-gray-100 shadow-sm;
+  }
+  /* 输入框：边框 + 聚焦高亮（ring 光环 + 边框变色），placeholder 灰字 */
+  .input {
+    @apply w-full px-3 py-2 rounded-lg border border-gray-200 text-sm
+           focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400
+           placeholder:text-gray-400 bg-white transition;
+  }
+  /* 徽章基类：圆角小标签（文档/知识库的状态展示） */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+  /* 状态徽章配色：绿=完成、蓝=处理中、黄=待处理、红=失败、灰=未知 */
+  .badge-green  { @apply badge bg-green-50 text-green-700; }
+  .badge-blue   { @apply badge bg-blue-50 text-blue-700; }
+  .badge-yellow { @apply badge bg-yellow-50 text-yellow-700; }
+  .badge-red    { @apply badge bg-red-50 text-red-700; }
+  .badge-gray   { @apply badge bg-gray-100 text-gray-600; }
+}
+
+/* Markdown content：AI 回答（v-html）的排版样式 */
+.prose-rag { @apply text-sm leading-relaxed text-gray-800; }
+.prose-rag p  { @apply mb-3; }
+.prose-rag h1, .prose-rag h2, .prose-rag h3 { @apply font-semibold mb-2 mt-4; }
+.prose-rag h1 { @apply text-lg; }
+.prose-rag h2 { @apply text-base; }
+.prose-rag ul { @apply list-disc pl-4 mb-3 space-y-1; }
+.prose-rag ol { @apply list-decimal pl-4 mb-3 space-y-1; }
+/* 行内代码：浅灰底小圆角；代码块：深底反白 + 横向滚动 */
+.prose-rag code { @apply bg-gray-100 px-1 py-0.5 rounded text-xs font-mono text-primary-700; }
+.prose-rag pre { @apply bg-gray-900 text-gray-100 p-3 rounded-lg text-xs overflow-x-auto mb-3; }
+.prose-rag pre code { @apply bg-transparent text-inherit px-0 py-0; }
+.prose-rag blockquote { @apply border-l-4 border-primary-200 pl-3 text-gray-500 italic mb-3; }
+.prose-rag table { @apply w-full text-xs border-collapse mb-3; }
+.prose-rag th { @apply bg-gray-50 border border-gray-200 px-2 py-1 text-left font-medium; }
+.prose-rag td { @apply border border-gray-200 px-2 py-1; }
+
+/* Typing animation：流式输出时"▋"光标的闪烁（1s 周期 step-end 闪烁） */
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.cursor-blink { animation: blink 1s step-end infinite; }
+
+/* Fade slide transitions：toast 弹层的淡入上浮/淡出 */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s, transform 0.2s; }
+.fade-enter-from { opacity: 0; transform: translateY(4px); }
+.fade-leave-to   { opacity: 0; }
