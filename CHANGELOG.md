@@ -12,6 +12,14 @@
 - 主色由靛蓝（indigo `#4f46e5`）改为青绿（teal `#0d9488`），统一更新 `tailwind.config.js` 色板。
 - 前端品牌名与浏览器标题改为「智能知识库 / 智能知识库问答」。
 
+#### 新主题截图（teal 风格，原始截图见 README）
+| 知识库列表 | 知识库详情 |
+| --- | --- |
+| ![new](images/new_kb_list.png) | ![new](images/new_kb_detail.png) |
+| 文档管理 | 对话页 |
+| ![new](images/new_docs.png) | ![new](images/new_chat.png) |
+
+
 ### 📦 工程化
 - 补充端到端流程测试 `tests/e2e_flow_test.py`，覆盖：健康检查 → 建知识库 → 上传文档 → 解析向量化 → SSE 流式问答 → 会话落库 → 删除清理。
 - 测试报告示例见 `tests/test-report.md`。
